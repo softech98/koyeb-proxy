@@ -1,6 +1,7 @@
 package main
 
 import (
+    "fmt"
     "log"
     "net/http"
     "net/http/httputil"
@@ -17,26 +18,45 @@ func main() {
 
     remote, err := url.Parse(target)
     if err != nil {
-        log.Fatal("Invalid TARGET_URL: ", err)
+        log.Fatal("Invalid TARGET_URL:", err)
     }
 
     proxy := httputil.NewSingleHostReverseProxy(remote)
-    
-    transport := &http.Transport{
-    Proxy: http.ProxyFromEnvironment,
-    MaxIdleConns: 100,
-    IdleConnTimeout: 90 * time.Second,
-    TLSHandshakeTimeout: 10 * time.Second,
-}
 
-proxy.Transport = transport
+    // Transport setup (optional tuning)
+    proxy.Transport = &http.Transport{
+        Proxy:               http.ProxyFromEnvironment,
+        MaxIdleConns:        100,
+        IdleConnTimeout:     90 * time.Second,
+        TLSHandshakeTimeout: 10 * time.Second,
+    }
 
-
+    // === Handler utama proxy ===
     http.HandleFunc("/", func(w http.ResponseWriter, r *http.Request) {
+        region := os.Getenv("KOYEB_REGION")
+        if region == "" {
+            region = "unknown"
+        }
+
+        // Tambahkan informasi region ke response header
+        w.Header().Set("X-Region", region)
+
+        // Pastikan host tujuan diset dengan benar
         r.Host = remote.Host
+
         proxy.ServeHTTP(w, r)
     })
 
-    log.Println("Proxy running on :8080 to", target)
+    // === Endpoint untuk cek region secara langsung ===
+    http.HandleFunc("/region", func(w http.ResponseWriter, r *http.Request) {
+        region := os.Getenv("KOYEB_REGION")
+        if region == "" {
+            region = "unknown"
+        }
+        fmt.Fprintf(w, "Active region: %s\n", region)
+    })
+
+    log.Println("✅ Proxy running on :8080 to", target)
+    log.Println("🌍 Region:", os.Getenv("KOYEB_REGION"))
     log.Fatal(http.ListenAndServe(":8080", nil))
 }
