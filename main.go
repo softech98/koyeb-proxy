@@ -56,7 +56,7 @@ func main() {
         fmt.Fprintf(w, "Active region: %s\n", region)
     })
 
-    log.Println("✅ Proxy running on :8080 to", target)
+    log.Println("✅ Proxy running on :80 to", target)
     log.Println("🌍 Region:", os.Getenv("KOYEB_REGION"))
-    log.Fatal(http.ListenAndServe(":8080", nil))
+    log.Fatal(http.ListenAndServe(":80", nil))
 }
