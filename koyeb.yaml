@@ -19,10 +19,10 @@ docker:
 
 routes:
   - path: /
-    port: 8080
+    port: 80
 
 ports:
-  - port: 8080
+  - port: 80
     protocol: http
 
 env:
