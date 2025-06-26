@@ -6,6 +6,7 @@ import (
     "net/http/httputil"
     "net/url"
     "os"
+    "time"
 )
 
 func main() {
@@ -20,6 +21,16 @@ func main() {
     }
 
     proxy := httputil.NewSingleHostReverseProxy(remote)
+    
+    transport := &http.Transport{
+    Proxy: http.ProxyFromEnvironment,
+    MaxIdleConns: 100,
+    IdleConnTimeout: 90 * time.Second,
+    TLSHandshakeTimeout: 10 * time.Second,
+}
+
+proxy.Transport = transport
+
 
     http.HandleFunc("/", func(w http.ResponseWriter, r *http.Request) {
         r.Host = remote.Host
