@@ -6,5 +6,5 @@ RUN go build -o proxy main.go
 FROM alpine:latest
 WORKDIR /root/
 COPY --from=builder /app/proxy .
-EXPOSE 8080
+EXPOSE 80
 CMD ["./proxy"]
