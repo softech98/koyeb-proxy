@@ -53,7 +53,12 @@ func main() {
         if region == "" {
             region = "unknown"
         }
-        fmt.Fprintf(w, "Active region: %s\n", region)
+        clientIP := r.Header.Get("X-Forwarded-For")
+    if clientIP == "" {
+        clientIP = r.RemoteAddr
+    }
+
+    fmt.Fprintf(w, "Client IP: %s\nActive region: %s\n", clientIP, region)
     })
 
     log.Println("✅ Proxy running on :80 to", target)
